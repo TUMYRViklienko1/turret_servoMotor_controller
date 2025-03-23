@@ -124,7 +124,7 @@ counterForServo++;
 
 void setup() {
     Serial.begin(9600);
-    Serial.setTimeout(1000); // Set timeout to 1000 milliseconds
+    Serial.setTimeout(10); // Set timeout to 1000 milliseconds
     while (!Serial) {}
 
     // Servo initialization
