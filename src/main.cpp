@@ -13,11 +13,6 @@ constexpr uint8_t HEAD_DEGREE = 2;
 constexpr uint16_t PWM_RESOLUTION = 4096;
 constexpr uint16_t SERVO_PERIOD_US = 20000;
 
-
-
-
-
-
 uint8_t baseServo = 0;     // Pin for pan
 uint8_t shoulderServo = 1; // Pin for tilt
 
@@ -46,41 +41,29 @@ void setup() {
 void loop() {
     
     if (Serial.available()) {
-        Serial.write("1");
-        delay(10);
-        //getFromSerialPort();
+        
+        getFromSerialPort();
         sendToServo();
     }
 }
 
 void getFromSerialPort() {
     String dataFromSerialPort = Serial.readStringUntil('\n');
+    int x, y;
 
+    if (sscanf(dataFromSerialPort.c_str(), "%d,%d", &x, &y) == 2) {
+        headCoordinates[0] = x;
+        headCoordinates[1] = y;
+    }
     
-    int valueIndex = 0; // Index for servoMotorAngles array
-    int startIdx = 0;   // Start index for substring
-    int commaIdx;
-  
-    // Loop to parse the string
-    while ((commaIdx = dataFromSerialPort.indexOf(',', startIdx)) != -1 && valueIndex < MAX_SERVO) {
-        headCoordinates[valueIndex] =  dataFromSerialPort.substring(startIdx, commaIdx).toInt();
-        startIdx = commaIdx + 1;
-        valueIndex++;
-    }
-  
-    // Handle the last value
-    if (valueIndex < MAX_SERVO) {
-        headCoordinates[valueIndex] =dataFromSerialPort.substring(startIdx).toInt();
-    }
-   
-
-  }
+}
 
 void sendToServo() {
-    auto panAngle = int((headCoordinates[0] * PWM_RESOLUTION) / SERVO_PERIOD_US);
-    auto tiltAngle = int((headCoordinates[1] * PWM_RESOLUTION) / SERVO_PERIOD_US);
-
-
+    Serial.println(headCoordinates[0]);
+    int panAngle = (long(headCoordinates[0]) * PWM_RESOLUTION) / SERVO_PERIOD_US;
+    int tiltAngle = (long(headCoordinates[1]) * PWM_RESOLUTION) / SERVO_PERIOD_US;
+    
+    Serial.println(panAngle);
     ServoController.analogWrite(baseServo, panAngle);
     ServoController.analogWrite(shoulderServo, tiltAngle);
 }
